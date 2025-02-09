@@ -16,7 +16,6 @@ const shortUrl = async (req, res) => {
 };
 
 const handleRedirect = async (req, res) => {
-  console.log('called',req.params)
   const { shortUrl } = req.params;  // Extract the short URL code from the URL
 
   try {

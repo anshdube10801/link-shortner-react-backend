@@ -1,37 +1,50 @@
 import URLData from '../model/userlink.js';
+import { nanoid } from 'nanoid';
 
 const createUrl = async (urlLink) => {
-const DOMAIN = process.env.VITE_BASE_URL;
-    try {
-      let originalUrl = urlLink?.originalUrl;
+  try {
+    let originalUrl = urlLink?.originalUrl;
 
-        const genRandomNum = Math.floor(1000 + Math.random() * 9000);
-        const shortUrl = `${DOMAIN}/${genRandomNum}`
-
-        if (!/^https?:\/\//i.test(originalUrl)) {
-          originalUrl = `http://${originalUrl}`; // Add http:// if not included
-        }
-
-      // Create a new product instance with all data
-      const newURL = new URLData({
-        original_Url:originalUrl, 
-        short_Url: genRandomNum,
-      });
-  
-      const savedUrl = await newURL.save();
-
-      const response = {
-        _id: savedUrl._id,
-        original_Url: savedUrl.original_Url,
-        shortcode: genRandomNum, 
-      };
-      return response;
-
-    } catch (error) {
-      console.error('Error saving product to DB:', error);
-      throw new Error('Product save failed');
+    if (!/^https?:\/\//i.test(originalUrl)) {
+      originalUrl = `http://${originalUrl}`; // Add http:// if not included
     }
-  };
+
+    // Check if the original URL already exists in the database
+    const existingUrl = await URLData.findOne({ original_Url: originalUrl });
+
+    if (existingUrl) {
+      // Return existing record if found
+      return {
+        _id: existingUrl._id,
+        original_Url: existingUrl.original_Url,
+        shortcode: existingUrl.short_Url,
+      };
+    }
+
+    // Generate new shortcode
+    const genRandomNum = nanoid(7);
+
+    // Create a new URL instance and save
+    const newURL = new URLData({
+      original_Url: originalUrl,
+      short_Url: genRandomNum,
+    });
+
+    const savedUrl = await newURL.save();
+
+    const response = {
+      _id: savedUrl._id,
+      original_Url: savedUrl.original_Url,
+      shortcode: genRandomNum,
+    };
+
+    return response;
+
+  } catch (error) {
+    console.error('Error saving product to DB:', error);
+    throw new Error('Product save failed');
+  }
+};
 
   const getOriginalUrlByShortUrl = async (shortUrl) => {
     try {
