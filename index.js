@@ -10,7 +10,10 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-  origin: 'https://shortifymylink.netlify.app',
+  origin: ['https://shortifymylink.netlify.app',
+     "https://status.uptimerobot.com",     
+    "https://uptimerobot.com"
+  ],
   methods: ['GET', 'POST'],
   maxAge: 86400,
   preflightContinue: true,
